@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PRD · AI PPT Creator | Lenovo AIPC On-Device Intelligent Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f2f7fd;
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+            color: #0b2b4a;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .prd-container {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 2.5rem;
+            box-shadow: 0 30px 60px -20px rgba(0, 70, 130, 0.25);
+            padding: 2.5rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            position: relative;
+        }
+
+        /* 语言切换按钮 */
+        .lang-switch {
+            position: absolute;
+            top: 2rem;
+            right: 2.5rem;
+            background: #0066cc;
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(0,102,204,0.35);
+            transition: all 0.2s;
+            z-index: 10;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .lang-switch:hover {
+            background: #004c99;
+            box-shadow: 0 12px 24px rgba(0,72,153,0.45);
+            transform: translateY(-1px);
+        }
+
+        .lang-switch:active {
+            transform: scale(0.97);
+        }
+
+        /* 语言内容容器默认隐藏 */
+        .lang-content {
+            display: none;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .lang-content.active {
+            display: flex;
+        }
+
+        /* 标题与版本 */
+        .prd-header {
+            border-bottom: 2px solid #e3efff;
+            padding-bottom: 1.8rem;
+        }
+
+        .doc-label {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: #0066cc;
+            background: #e5f0ff;
+            padding: 0.3rem 1.5rem;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 1.2rem;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #00315e;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: #2d4b6c;
+            font-weight: 400;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            margin-top: 1.2rem;
+            font-size: 0.95rem;
+            color: #34506e;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #003366;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border-left: 6px solid #0066cc;
+            padding-left: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .section-title .num {
+            background: #0066cc;
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 0.2rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.8rem;
+        }
+
+        .card {
+            background: #f8fcff;
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            border: 1px solid #d7e7fa;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 22px -8px rgba(0,102,204,0.15);
+            border-color: #0066cc;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #002856;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .card p,
+        .card li {
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: #1e3857;
+        }
+
+        ul,
+        ol {
+            padding-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .badge {
+            background: #0066cc;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+            display: inline-block;
+        }
+
+        .highlight-box {
+            background: #e3f0ff;
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            border-left: 5px solid #0055aa;
+            font-weight: 500;
+            color: #002244;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,51,102,0.06);
+        }
+
+        th {
+            background: #0066cc;
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #dfeaf7;
+            color: #1a2f44;
+        }
+
+        .metric-highlight {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #004c99;
+        }
+
+        .btn-mock {
+            background: #0066cc;
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.8rem 2.2rem;
+            border-radius: 40px;
+            cursor: default;
+            box-shadow: 0 8px 16px rgba(0,102,204,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.8rem;
+        }
+
+        hr {
+            border: 0.5px solid #d2e2f5;
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 1.5rem 1rem;
+            }
+            .prd-container {
+                padding: 2rem 1.5rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .lang-switch {
+                top: 1.2rem;
+                right: 1.5rem;
+                padding: 0.5rem 1.4rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="prd-container">
+        <!-- 语言切换按钮 -->
+        <button class="lang-switch" id="langToggle">
+            <span class="btn-zh">EN</span>
+            <span class="btn-en" style="display:none;">中文</span>
+        </button>
+
+        <!-- 中文内容 -->
+        <div class="lang-content lang-zh active">
+            <div class="prd-header">
+                <div class="doc-label">产品需求文档 · PRD</div>
+                <h1>AI PPT 创作</h1>
+                <div class="subtitle">端侧原生智能演示生成 · 联想AIPC核心生产力功能</div>
+                <div class="meta-row">
+                    <div><strong>版本</strong>：V1.0</div>
+                    <div><strong>状态</strong>：概念定义 / 待评审</div>
+                    <div><strong>提出人</strong>：产品经理候选人</div>
+                    <div><strong>日期</strong>：2026-06-23</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">1</span> 背景与问题定义</div>
+                <div class="card-grid">
+                    <div class="card"><h3>📌 用户现状</h3><p>职场人、学生、创业者平均每月制作2~4份PPT。当前若使用AI辅助，典型路径为：<br>① 打开浏览器 → 豆包/DeepSeek等云端工具；<br>② 反复对话调整大纲与内容；<br>③ 下载文件到本地；<br>④ 手动修改格式、补充本地素材。<br><strong>流程割裂，效率折损，且敏感数据上传云端存在隐私风险。</strong></p></div>
+                    <div class="card"><h3>🔥 核心痛点</h3><ul><li><strong>认知门槛</strong>：大量普通用户不知道AI可以做PPT，未能触达。</li><li><strong>操作碎片化</strong>：需在浏览器、本地应用、文件管理器间反复跳转。</li><li><strong>隐私泄漏</strong>：商业计划、内部数据上传至第三方云端，企业合规风险高。</li><li><strong>本地素材浪费</strong>：已有的备忘录、Word提纲、MD笔记无法自动转化为PPT内容。</li><li><strong>离线不可用</strong>：飞机、高铁、户外等无网环境完全无法使用云端AI。</li></ul></div>
+                </div>
+                <div class="highlight-box">💡 <strong>产品机会</strong>：将AI PPT生成能力原生嵌入联想笔记本的PPT应用中，利用NPU本地运行，实现“打开PPT → 口述需求 → 实时生成 → 零上传”的闭环。让AI从“需要专门去用的网页工具”变为“电脑自带的原生能力”。</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">2</span> 产品目标与成功指标</div>
+                <div class="card-grid">
+                    <div class="card"><h3>🎯 业务目标</h3><ul><li>打造AIPC差异化核心卖点，使“AI PPT创作”成为联想笔记本选购的关键决策因素之一。</li><li>激活沉默用户：让超过30%的非AI工具用户首次通过此功能体验端侧AI。</li><li>建立隐私安全心智，强化联想商用系列信任壁垒。</li></ul></div>
+                    <div class="card"><h3>📊 核心指标 (North Star)</h3><ul><li><span class="badge">激活率</span> 打开PPT的用户中 ≥ 30% 主动唤醒AI浮窗。</li><li><span class="badge">生成成功率</span> 发起生成请求后，≥ 75% 成功产出并保存PPT。</li><li><span class="badge">月活跃度</span> 人均月生成PPT数量 ≥ 2.0 次。</li><li><span class="badge">NPS</span> 功能内反馈NPS ≥ 45。</li></ul></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">3</span> 用户画像与核心场景</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>画像</th><th>典型身份</th><th>场景实例</th><th>频次</th><th>核心诉求</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>效率型白领</strong></td><td>项目经理、市场运营</td><td>周一需提交周报PPT，周五下午快速整合数据</td><td>每周1-2次</td><td>快，不想离开PPT界面</td></tr>
+                            <tr><td><strong>学业攻坚者</strong></td><td>研究生、本科生</td><td>论文答辩PPT、课程汇报</td><td>每月3-4次</td><td>结构清晰，引用笔记素材</td></tr>
+                            <tr><td><strong>小微企业主</strong></td><td>创业公司CEO、个体户</td><td>商业计划书、产品介绍给投资人/客户</td><td>每月2次</td><td>数据绝对保密，不能上传云端</td></tr>
+                            <tr><td><strong>自媒体创作者</strong></td><td>视频博主、知识IP</td><td>将口播稿或脚本快速转为直播课件/分享PPT</td><td>每周1-2次</td><td>结合本地脚本文件自动生成</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">4</span> 功能详细说明</div>
+                <div class="card"><h3>4.1 唤醒与入口</h3><ul><li><strong>主入口</strong>：用户启动Microsoft PowerPoint / WPS演示时，右侧自动滑出“天禧AI创作”浮窗（延迟≤0.5秒），半透明磨砂质感，不遮挡主界面。</li><li><strong>副入口</strong>：PPT工具栏固定【AI创作】按钮，点击可随时调起/隐藏浮窗。</li><li><strong>系统级唤醒</strong>：支持快捷键（如Fn+F11）或任务栏天禧图标一键创建新AI PPT。</li></ul></div>
+                <div class="card"><h3>4.2 交互流程</h3><ol><li><strong>意图输入</strong>：用户在浮窗内通过语音或文字描述需求。示例：“帮我做一份Q2销售复盘，风格简约，包含收入趋势和区域对比，参考我桌面上‘销售数据.md’”。</li><li><strong>本地素材解析</strong>：Agent自动扫描用户指定的本地文件（支持.pptx/.docx/.md/.txt/.html），利用NPU进行内容理解与关键信息提取。</li><li><strong>大纲生成</strong>：3秒内生成结构化大纲（封面、目录、章节页、总结），呈现在浮窗中供用户确认/调整。</li><li><strong>幻灯片实时生成</strong>：确认大纲后，在PPT应用程序内逐页填充内容（标题、正文、关键数据高亮），并给出配图建议位置。整体生成时间&lt;15秒（5页标准PPT）。</li><li><strong>微调与编辑</strong>：用户可继续口述指令修改（如“第三页换成柱状图”“语气更正式一些”），所有修改直接在PPT原生界面完成。</li><li><strong>保存</strong>：生成结果保存为本地.pptx文件，完全离线，无任何数据外传。</li></ol></div>
+                <div class="card-grid">
+                    <div class="card"><h3>4.3 关键能力细则</h3><ul><li><strong>多模态输入</strong>：语音（实时转写）+ 文字混合输入。</li><li><strong>模板体系</strong>：本地预置15+模板（商务/科技/学术/创意），AI根据内容自动推荐。</li><li><strong>隐私沙箱</strong>：文件读取仅在本地临时向量化，不缓存原始文本，NPU处理完即释放。</li><li><strong>离线全功能</strong>：不依赖网络，所有模型（语言、排版）均运行在NPU上。</li></ul></div>
+                    <div class="card"><h3>4.4 边界与异常处理</h3><ul><li>用户未指定素材时，AI基于通用知识生成内容（仍本地运行）。</li><li>若语音识别模糊，浮窗给出文字候选让用户点选。</li><li>生成过程中用户可随时取消，已生成幻灯片保留。</li><li>NPU负载过高时排队处理，提示“正在全力生成…”。</li></ul></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">5</span> 技术实现与依赖</div>
+                <div class="card"><h3>5.1 端侧推理栈</h3><ul><li><strong>语言模型</strong>：本地部署轻量级SLM（如Phi-4-mini或等效率模型），量化后运行在NPU上，负责大纲生成、内容撰写、风格调整。</li><li><strong>嵌入与检索</strong>：本地向量模型将用户素材索引，用于相关段落提取，同样运行在NPU。</li><li><strong>语音识别</strong>：端侧ASR模型（如Whisper.cpp NPU适配版），实时转写。</li></ul></div>
+                <div class="card"><h3>5.2 系统集成</h3><ul><li><strong>天禧Agent框架</strong>：作为调度中枢，管理上下文、工具调用与PPT应用通信。</li><li><strong>PPT控制接口</strong>：通过Office Add-in或WPS插件API实现幻灯片创建、文本填充、图表建议。</li><li><strong>文件访问</strong>：通过系统文件选择器（用户授权后）读取指定路径文件。</li></ul></div>
+                <div class="card"><h3>5.3 硬件要求</h3><ul><li>NPU算力 ≥ 40 TOPS（Intel Core Ultra 200V / AMD Ryzen AI 300 / 骁龙X Elite 等）。</li><li>内存建议 ≥ 16GB，保证模型加载与素材处理流畅。</li></ul></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">6</span> 用户价值与转化逻辑</div>
+                <div class="highlight-box"><strong>🔁 转化飞轮</strong><br>① 用户打开PPT → 首次见到AI浮窗（零认知成本）→ ② 好奇尝试一句话生成 → ③ 得到可直接使用的完整PPT，体验惊喜 → ④ 逐渐依赖，不再使用网页AI工具 → ⑤ 形成“做PPT就用联想AI”的心智 → ⑥ 推荐他人或复购时优先选择联想AIPC。</div>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <div style="flex:1;"><span class="metric-highlight">20%+</span><p style="font-weight: 500;">非AI用户触达转化率</p><p style="color: #34506e;">从未用过AI PPT的用户因该功能首次体验端侧AI。</p></div>
+                    <div style="flex:1;"><span class="metric-highlight">隐私无忧</span><p style="font-weight: 500;">企业级数据安全</p><p style="color: #34506e;">所有内容处理均在本地，满足金融、政务、医疗等合规要求。</p></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">7</span> 落地路径与里程碑</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>阶段</th><th>范围</th><th>关键交付</th><th>时间预估</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>MVP</strong></td><td>AI浮窗 + 语音/文字生成大纲 + 基础模板 + 本地保存</td><td>可在门店演示的端到端流程</td><td>3个月</td></tr>
+                            <tr><td><strong>V1.1</strong></td><td>本地文件引用（Word/MD/备忘录）+ 多风格模板</td><td>素材融合能力上线</td><td>+2个月</td></tr>
+                            <tr><td><strong>V1.2</strong></td><td>图表智能建议、团队模板共享、企业管控策略</td><td>商用场景完整覆盖</td><td>+3个月</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">8</span> 竞争壁垒与差异化</div>
+                <div class="card"><ul><li><strong>唯一全本地方案</strong>：对比豆包、Gamma、WPS AI等端云混合产品，我们实现零上传，是唯一满足高隐私要求的AI PPT生成工具。</li><li><strong>原生集成体验</strong>：不跳出PPT应用，学习成本为零，竞品无法在Windows/Mac系统层面同等深度集成。</li><li><strong>硬件绑定护城河</strong>：NPU推理能力与联想AIPC深度绑定，形成“硬件+软件+AI”三位一体壁垒，软件功能可成为硬件换机驱动力。</li></ul></div>
+            </div>
+
+            <div style="text-align: center; color: #336699; font-weight: 500; border-top: 1px solid #d9e6f5; padding-top: 2rem; margin-top: 1rem;">
+                联想 AIPC 产品需求文档 · AI PPT 创作 (PRD V1.0) · 端侧智能生产力
+            </div>
+        </div>
+
+        <!-- 英文内容 -->
+        <div class="lang-content lang-en">
+            <div class="prd-header">
+                <div class="doc-label">Product Requirements Document · PRD</div>
+                <h1>AI PPT Creator</h1>
+                <div class="subtitle">On-Device Native Intelligent Presentation Generation · Lenovo AIPC Core Productivity Feature</div>
+                <div class="meta-row">
+                    <div><strong>Version</strong>: V1.0</div>
+                    <div><strong>Status</strong>: Concept Definition / Pending Review</div>
+                    <div><strong>Author</strong>: PM Candidate</div>
+                    <div><strong>Date</strong>: 2026-06-23</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">1</span> Background & Problem Statement</div>
+                <div class="card-grid">
+                    <div class="card"><h3>📌 Current User Journey</h3><p>Professionals, students, and entrepreneurs create 2~4 PPTs per month on average. When using AI assistance today, the typical workflow is:<br>① Open browser → cloud tools like Doubao/DeepSeek;<br>② Iteratively prompt to adjust outline and content;<br>③ Download file to local;<br>④ Manually fix formatting and supplement local assets.<br><strong>The process is fragmented, inefficient, and uploading sensitive data to the cloud poses privacy risks.</strong></p></div>
+                    <div class="card"><h3>🔥 Core Pain Points</h3><ul><li><strong>Awareness Barrier</strong>: Many ordinary users don't know AI can create PPTs, remaining unreached.</li><li><strong>Fragmented Operations</strong>: Constant switching among browser, local app, and file manager.</li><li><strong>Privacy Leakage</strong>: Business plans, internal data uploaded to third-party cloud, high compliance risk.</li><li><strong>Wasted Local Assets</strong>: Existing memos, Word outlines, Markdown notes cannot be automatically turned into slides.</li><li><strong>Offline Unavailable</strong>: Completely unusable on flights, high-speed trains, or outdoors without internet.</li></ul></div>
+                </div>
+                <div class="highlight-box">💡 <strong>Product Opportunity</strong>: Embed AI PPT generation natively into Lenovo's PowerPoint/WPS experience, running locally on NPU, achieving a closed loop of “Open PPT → Speak your request → Real-time generation → Zero upload”. Transform AI from “a web tool you need to go find” into “a built-in capability of your PC”.</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">2</span> Product Goals & Success Metrics</div>
+                <div class="card-grid">
+                    <div class="card"><h3>🎯 Business Goals</h3><ul><li>Establish AIPC differentiation: make "AI PPT Creator" a key purchase decision factor for Lenovo notebooks.</li><li>Activate silent users: enable over 30% of non-AI-tool users to experience on-device AI for the first time via this feature.</li><li>Build privacy trust, strengthening Lenovo commercial lineup's security perception.</li></ul></div>
+                    <div class="card"><h3>📊 North Star Metrics</h3><ul><li><span class="badge">Activation Rate</span> ≥30% of PPT users actively invoke the AI floating panel.</li><li><span class="badge">Generation Success Rate</span> ≥75% of initiated requests result in a saved PPT.</li><li><span class="badge">Monthly Active Usage</span> Average ≥2.0 PPTs generated per user per month.</li><li><span class="badge">NPS</span> In-app feedback NPS ≥45.</li></ul></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">3</span> User Personas & Core Scenarios</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Persona</th><th>Typical Role</th><th>Scenario Example</th><th>Frequency</th><th>Core Need</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Efficiency White-collar</strong></td><td>Project Manager, Marketing Ops</td><td>Weekly report PPT due Monday, quick data integration Friday afternoon</td><td>1-2 times/week</td><td>Fast, don't want to leave PPT</td></tr>
+                            <tr><td><strong>Academic Achiever</strong></td><td>Graduate, Undergraduate</td><td>Thesis defense PPT, course presentation</td><td>3-4 times/month</td><td>Clear structure, leverage notes</td></tr>
+                            <tr><td><strong>Small Business Owner</strong></td><td>Startup CEO, Solopreneur</td><td>Business plan, product intro for investors/clients</td><td>2 times/month</td><td>Absolute data confidentiality, no cloud upload</td></tr>
+                            <tr><td><strong>Content Creator</strong></td><td>Video Blogger, Knowledge IP</td><td>Turn voice scripts into live-stream decks or sharing PPTs</td><td>1-2 times/week</td><td>Auto-generate from local script files</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">4</span> Detailed Feature Description</div>
+                <div class="card"><h3>4.1 Activation & Entry Points</h3><ul><li><strong>Primary Entry</strong>: When user launches Microsoft PowerPoint / WPS Presentation, the "Tianxi AI Creator" floating panel slides in from the right (≤0.5s delay), with a frosted glass semi-transparent look, not blocking the main UI.</li><li><strong>Secondary Entry</strong>: A fixed [AI Create] button in the PPT toolbar to show/hide the panel anytime.</li><li><strong>System-level</strong>: Support shortcut key (e.g., Fn+F11) or Tianxi taskbar icon to instantly create a new AI PPT.</li></ul></div>
+                <div class="card"><h3>4.2 Interaction Flow</h3><ol><li><strong>Intent Input</strong>: User describes needs via voice or text in the panel. Example: "Create a Q2 sales review PPT, clean style, include revenue trends and regional comparison, reference 'sales-data.md' on my desktop."</li><li><strong>Local Asset Parsing</strong>: Agent automatically scans user-specified local files (.pptx/.docx/.md/.txt/.html), uses NPU for content understanding and key info extraction.</li><li><strong>Outline Generation</strong>: Structured outline (cover, TOC, sections, summary) generated within 3 seconds, shown in panel for user confirmation/adjustment.</li><li><strong>Real-time Slide Generation</strong>: After outline confirmed, slides are filled page by page directly inside PPT (title, body, key data highlighted), with image placement suggestions. Total generation time &lt;15s for a standard 5-slide deck.</li><li><strong>Refinement & Editing</strong>: User can continue with voice commands ("Change third slide to bar chart", "Make tone more formal"), all edits happen natively within PPT.</li><li><strong>Save</strong>: Result saved as local .pptx file, completely offline, zero data exfiltration.</li></ol></div>
+                <div class="card-grid">
+                    <div class="card"><h3>4.3 Key Capability Details</h3><ul><li><strong>Multimodal Input</strong>: Voice (real-time transcription) + text mixed input.</li><li><strong>Template System</strong>: 15+ locally preset templates (Business/Tech/Academic/Creative), AI auto-recommends based on content.</li><li><strong>Privacy Sandbox</strong>: Files are temporarily vectorized locally, raw text not cached, released after NPU processing.</li><li><strong>Full Offline Functionality</strong>: No network dependency; all models (language, layout) run on NPU.</li></ul></div>
+                    <div class="card"><h3>4.4 Edge Cases & Error Handling</h3><ul><li>When no assets specified, AI generates content based on general knowledge (still local).</li><li>If voice recognition is ambiguous, panel offers text alternatives for user to select.</li><li>User can cancel generation anytime; already generated slides are kept.</li><li>When NPU is under high load, request is queued with a "Generating at full speed…" notice.</li></ul></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">5</span> Technical Implementation & Dependencies</div>
+                <div class="card"><h3>5.1 On-Device Inference Stack</h3><ul><li><strong>Language Model</strong>: Locally deployed lightweight SLM (e.g., Phi-4-mini or equivalent), quantized to run on NPU, responsible for outline, content writing, and style tuning.</li><li><strong>Embedding & Retrieval</strong>: Local embedding model indexes user assets for relevant paragraph extraction, also runs on NPU.</li><li><strong>Speech Recognition</strong>: On-device ASR model (e.g., Whisper.cpp NPU-adapted), real-time transcription.</li></ul></div>
+                <div class="card"><h3>5.2 System Integration</h3><ul><li><strong>Tianxi Agent Framework</strong>: Acts as orchestration hub, managing context, tool calls, and communication with PPT application.</li><li><strong>PPT Control Interface</strong>: Via Office Add-in or WPS plugin API to create slides, fill text, suggest charts.</li><li><strong>File Access</strong>: Through system file picker (after user authorization) to read specified paths.</li></ul></div>
+                <div class="card"><h3>5.3 Hardware Requirements</h3><ul><li>NPU performance ≥ 40 TOPS (Intel Core Ultra 200V / AMD Ryzen AI 300 / Snapdragon X Elite etc.).</li><li>Memory recommendation ≥ 16GB for smooth model loading and asset processing.</li></ul></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">6</span> User Value & Conversion Logic</div>
+                <div class="highlight-box"><strong>🔁 Conversion Flywheel</strong><br>① User opens PPT → sees AI panel for the first time (zero learning cost) → ② Curiosity drives a one-sentence try → ③ Receives a ready-to-use complete PPT, delightful experience → ④ Gradually relies on it, abandons web AI tools → ⑤ Forms mental model "Make PPT = Lenovo AI" → ⑥ Recommends or repurchases Lenovo AIPC.</div>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <div style="flex:1;"><span class="metric-highlight">20%+</span><p style="font-weight: 500;">Non-AI User Conversion</p><p style="color: #34506e;">Users who never used AI PPT before experience on-device AI for the first time.</p></div>
+                    <div style="flex:1;"><span class="metric-highlight">Privacy First</span><p style="font-weight: 500;">Enterprise-Grade Data Security</p><p style="color: #34506e;">All processing stays local, meeting compliance for finance, government, healthcare.</p></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">7</span> Roadmap & Milestones</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Phase</th><th>Scope</th><th>Key Deliverables</th><th>Estimated Time</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>MVP</strong></td><td>AI panel + voice/text outline generation + basic templates + local save</td><td>End-to-end demo ready for in-store showcase</td><td>3 months</td></tr>
+                            <tr><td><strong>V1.1</strong></td><td>Local file reference (Word/MD/Memos) + multi-style templates</td><td>Asset fusion capability launched</td><td>+2 months</td></tr>
+                            <tr><td><strong>V1.2</strong></td><td>Smart chart suggestions, team template sharing, enterprise management policies</td><td>Full commercial scenario coverage</td><td>+3 months</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="num">8</span> Competitive Moat & Differentiation</div>
+                <div class="card"><ul><li><strong>Only Fully Local Solution</strong>: Compared to Doubao, Gamma, WPS AI and other cloud-hybrid products, we achieve zero upload, being the only AI PPT generator meeting high privacy requirements.</li><li><strong>Native Integrated Experience</strong>: Never leaves the PPT app, zero learning cost; competitors cannot integrate at the same OS depth on Windows/Mac.</li><li><strong>Hardware-Locked Moat</strong>: NPU inference tightly bound to Lenovo AIPC, forming a "Hardware + Software + AI" trinity barrier; software features become hardware upgrade drivers.</li></ul></div>
+            </div>
+
+            <div style="text-align: center; color: #336699; font-weight: 500; border-top: 1px solid #d9e6f5; padding-top: 2rem; margin-top: 1rem;">
+                Lenovo AIPC Product Requirements Document · AI PPT Creator (PRD V1.0) · On-Device Intelligent Productivity
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const btn = document.getElementById('langToggle');
+            const zhContent = document.querySelector('.lang-zh');
+            const enContent = document.querySelector('.lang-en');
+            const btnZh = btn.querySelector('.btn-zh');
+            const btnEn = btn.querySelector('.btn-en');
+
+            // 初始状态：中文显示
+            let currentLang = 'zh';
+
+            function switchLang(lang) {
+                if (lang === 'en') {
+                    zhContent.classList.remove('active');
+                    enContent.classList.add('active');
+                    btnZh.style.display = 'none';
+                    btnEn.style.display = 'inline';
+                    currentLang = 'en';
+                } else {
+                    enContent.classList.remove('active');
+                    zhContent.classList.add('active');
+                    btnEn.style.display = 'none';
+                    btnZh.style.display = 'inline';
+                    currentLang = 'zh';
+                }
+            }
+
+            btn.addEventListener('click', function() {
+                if (currentLang === 'zh') {
+                    switchLang('en');
+                } else {
+                    switchLang('zh');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
